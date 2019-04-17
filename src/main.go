@@ -20,13 +20,13 @@ func GetContext(path string) io.Reader {
      return ctx
 }
 
-func StoreToFile(filename string, text string) { 
-     file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0755)	
+func StoreToFile(filename string, text string) {
+     file, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0755)
      defer file.Close()
 
      if err != nil {
 	    fmt.Println("Could not write to file", err)
-	    return 
+	    return
      }
 
      file.WriteString(text+"\n")
@@ -35,7 +35,7 @@ func StoreToFile(filename string, text string) {
 func ReadFromFile(filename string) []string {
     var data []string
     file, _ := os.Open(filename)
-    
+
     scanner := bufio.NewScanner(file)
 
     for scanner.Scan() {
@@ -64,15 +64,15 @@ func main() {
 		fmt.Println("Build from directory:", args[1])
 
                 resp, err := cli.ImageBuild(ctx, GetContext(args[1]), types.ImageBuildOptions{})
-                
+
 		if err != nil {
 		  fmt.Println(err)
 		}
 
 		scanner := bufio.NewScanner(resp.Body)
-                
+
 		for scanner.Scan() {
-                    index := strings.Index(scanner.Text(), "Successfully built") 
+                    index := strings.Index(scanner.Text(), "Successfully built")
 		    if index > 1 {
 		       imageId := scanner.Text()[index+19:len(scanner.Text())-4]
 		       fmt.Println("The image is created with id:", imageId)
@@ -81,19 +81,30 @@ func main() {
 		}
 
 	}else if action == "run" {
-	 fmt.Println("Run containers", args[1])
-	 data := ReadFromFile("/tmp/imageid")
+		fmt.Println("Start")
+		data := ReadFromFile("/tmp/imageid")
+		resp, err := cli.ContainerCreate(ctx, &container.Config{Image: data[0]}, nil, nil, "")
 
-	 resp, err := cli.ContainerCreate(ctx, &container.Config{Image: data[0]}, nil, nil, "") 
+    if err != nil {
+       panic(err)
+	  }
 
-	 if err != nil {
-           panic(err)
+	  if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+	     panic(err)
+	  }
+
+	  fmt.Println("A new container is running with:", resp.ID)
+		StoreToFile("/tmp/containers", resp.ID)
+   }else if action == "validate" {
+		 fmt.Println("validate")
+
+	 }else if action == "monitor" {
+		 fmt.Println("monitor")
+
+	 }else if action == "logs" {
+		 fmt.Println("logs")
+
+ 	}else if action == "drop" {
+     fmt.Println("drop")
 	}
-
-	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-	   panic(err)
-	}
-
-	fmt.Println("A new container is running with:", resp.ID)
-      }
 }
