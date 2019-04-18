@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 	"fmt"
-        "io"
-        "bufio"
-        "strings"
-
-	"github.com/docker/docker/client"
-        "github.com/docker/docker/api/types"
+	"io"
+	"bufio"
+	"strings"
+	"encoding/json"
+  "github.com/docker/docker/client"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/api/types/container"
 )
@@ -96,11 +96,51 @@ func main() {
 	  fmt.Println("A new container is running with:", resp.ID)
 		StoreToFile("/tmp/containers", resp.ID)
    }else if action == "validate" {
-		 fmt.Println("validate")
+
+      buildContainers := ReadFromFile("/tmp/containers")
+
+		 containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+
+		 if err != nil {
+			 panic(err)
+		 }
+
+		 for _, container := range containers {
+		    fmt.Println(container.ID)
+
+				for _, c := range buildContainers {
+
+					if container.ID == c {
+						fmt.Println("Container is running", container.ID)
+					}
+				}
+	}
+
+
 
 	 }else if action == "monitor" {
-		 fmt.Println("monitor")
+     buildContainers := ReadFromFile("/tmp/containers")
 
+		 for _, c := range buildContainers {
+			 fmt.Println("Container:", c)
+			 resp, err := cli.ContainerStats(context.Background(), c, false)
+
+			 if err != nil {
+				 panic(err)
+			 }
+
+			 dec := json.NewDecoder(resp.Body)
+			 var s map[string]interface{}
+			if err := dec.Decode(&s); err != nil {
+					 fmt.Println(err)
+					 return
+			}
+
+      cpu_stats := s["cpu_stats"]
+      fmt.Println(cpu_stats)
+
+			fmt.Println(s["memory_stats"])
+    }
 	 }else if action == "logs" {
 		 fmt.Println("logs")
 
