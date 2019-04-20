@@ -2,6 +2,7 @@
 
 ## Description
 A command line tool to manage containers. The omega builds, runs, validates and monitors a list of containers.
+It uses the local docker engine. But easily you can change it to a remote host with environmental variable DOCKER_HOST.
 
 ## Implementation
 I used the Go language to develop the tool.
