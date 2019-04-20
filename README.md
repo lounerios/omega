@@ -1,16 +1,16 @@
-#Omega tool
+# Omega tool
 
-##Description
+## Description
 A command line tool to manage containers. The omega builds, runs, validates and monitors a list of containers.
 
-##Implementation
+## Implementation
 I used the Go language to develop the tool.
 It takes as argument a directory with Dockerfile and app. It builds the image and stores the id in the file /tmp/imageid.
 Each time a new container is going to be started from omega, the container's id is added in the file /tmp/containers.
 In order to execute the other actions, the omega tool reads the list of the containers from the file /tmp/containers
 and runs the function which applies the action.
 
-##Installation
+## Installation
 You have to install two Go libraries.
 The library for the Docker SDK and a library for JSON handling.
 
