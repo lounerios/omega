@@ -149,7 +149,7 @@ func Logs(client *client.Client, ctx context.Context, containersCreated []string
 		}
 		scanner := bufio.NewScanner(reader)
 		for scanner.Scan() {
-			var s = []string {logs, c+scanner.Text()}
+			var s = []string {logs, c+":"+scanner.Text()}
 			logs = strings.Join(s, "\n")
 		}
 
