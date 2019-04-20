@@ -31,7 +31,7 @@ or
 go build -o omega src/main.go
 ```
 
-##Arguments
+## Parameters
 
 ### build
 It takes a directory with docker files as argument. It must contains the Dockerfile
